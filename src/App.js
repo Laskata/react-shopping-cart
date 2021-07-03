@@ -15,33 +15,18 @@ const App = () => {
       : []
   );
 
-  const createOrder = (order) => {
-    alert("Need to save order for " + order.name);
-  };
-
-  const removeFromCart = (product) => {
-    const shoppingCartItems = shoppingCart.slice();
-    const newItems = shoppingCartItems.filter(
-      (item) => item._id !== product._id
-    );
-    setShoppingCart(newItems);
-    localStorage.setItem("cartItem", JSON.stringify(newItems));
-  };
-
-  const addToCart = (product) => {
-    const shoppingCartItems = shoppingCart.slice();
-    let alreadyInCart = false;
-    shoppingCartItems.forEach((item) => {
-      if (item._id === product._id) {
-        item.count++;
-        alreadyInCart = true;
-      }
-    });
-    if (!alreadyInCart) {
-      shoppingCartItems.push({ ...product, count: 1 });
+  const filterProducts = (event) => {
+    if (event.target.value === "") {
+      setSize(event.target.value);
+      setProducts(data.products);
+    } else {
+      setSize(event.target.value);
+      setProducts(
+        data.products.filter(
+          (product) => product.availableSizes.indexOf(event.target.value) >= 0
+        )
+      );
     }
-    setShoppingCart(shoppingCartItems);
-    localStorage.setItem("cartItem", JSON.stringify(shoppingCartItems));
   };
 
   const sortProducts = (event) => {
@@ -66,18 +51,33 @@ const App = () => {
     );
   };
 
-  const filterProducts = (event) => {
-    if (event.target.value === "") {
-      setSize(event.target.value);
-      setProducts(data.products);
-    } else {
-      setSize(event.target.value);
-      setProducts(
-        data.products.filter(
-          (product) => product.availableSizes.indexOf(event.target.value) >= 0
-        )
-      );
+  const addToCart = (product) => {
+    const shoppingCartItems = shoppingCart.slice();
+    let alreadyInCart = false;
+    shoppingCartItems.forEach((item) => {
+      if (item._id === product._id) {
+        item.count++;
+        alreadyInCart = true;
+      }
+    });
+    if (!alreadyInCart) {
+      shoppingCartItems.push({ ...product, count: 1 });
     }
+    setShoppingCart(shoppingCartItems);
+    localStorage.setItem("cartItem", JSON.stringify(shoppingCartItems));
+  };
+
+  const removeFromCart = (product) => {
+    const shoppingCartItems = shoppingCart.slice();
+    const newItems = shoppingCartItems.filter(
+      (item) => item._id !== product._id
+    );
+    setShoppingCart(newItems);
+    localStorage.setItem("cartItem", JSON.stringify(newItems));
+  };
+
+  const createOrder = (order) => {
+    alert("Need to save order for " + order.name);
   };
 
   return (
