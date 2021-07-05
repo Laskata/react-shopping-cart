@@ -5,8 +5,9 @@ import Modal from "react-modal";
 import Zoom from "react-reveal/Zoom";
 import { connect } from "react-redux";
 import { fetchProducts } from "../actions/productActions";
+import { addToCart } from "../actions/cartActions";
 
-const Products = (props, { addToCart }) => {
+const Products = (props) => {
   useEffect(() => {
     props.fetchProducts();
   }, []);
@@ -41,7 +42,7 @@ const Products = (props, { addToCart }) => {
                   <div className="product-price">
                     <div>{formatCurrency(product.price)}</div>
                     <button
-                      onClick={() => addToCart(product)}
+                      onClick={() => props.addToCart(product)}
                       className="button primary"
                     >
                       Add To Cart
@@ -100,4 +101,4 @@ const mapStateToProps = (state) => {
   return { products: state.products.filteredItems };
 };
 
-export default connect(mapStateToProps, { fetchProducts })(Products);
+export default connect(mapStateToProps, { fetchProducts, addToCart })(Products);
