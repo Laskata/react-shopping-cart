@@ -1,5 +1,4 @@
 import { FETCH_PRODUCTS } from "../types";
-import products from "../apis/products";
 
 export const fetchProducts = () => async (dispatch) => {
   const res = await fetch("/api/products");
