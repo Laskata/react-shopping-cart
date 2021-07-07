@@ -81,7 +81,7 @@ const Products = (props) => {
                   <button
                     className="button primary"
                     onClick={() => {
-                      addToCart(showProduct);
+                      props.addToCart(showProduct);
                       closeModal();
                     }}
                   >
