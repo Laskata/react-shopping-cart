@@ -1,40 +1,92 @@
 import React, { useState } from "react";
 import formatCurrency from "../util";
 import Fade from "react-reveal/Fade";
+import Zoom from "react-reveal/Zoom";
+import Modal from "react-modal";
 import { connect } from "react-redux";
 import { removeFromCart } from "../actions/cartActions";
+import { createOrder, clearOrder } from "../actions/orderActions";
 
-const Cart = (
-  props,
-  { shoppingCart, onCreateOrder, removeFromCart, cartItems }
-) => {
+const Cart = (props, { closeModal }) => {
   const [showCheckout, setShowCheckout] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
 
-  const handleInput = (event) => {
-    setName({ [event.target.name]: event.target.value });
-    setEmail({ [event.target.name]: event.target.value });
-    setAddress({ [event.target.name]: event.target.value });
+  const [checkoutInfo, setCheckoutInfo] = useState({
+    name: "",
+    email: "",
+    address: "",
+  });
+
+  const { name, email, address } = checkoutInfo;
+
+  const handleInput = (event, name) => {
+    setCheckoutInfo({
+      ...checkoutInfo,
+      [name]: event.target.value,
+    });
   };
 
-  const createOrder = (e) => {
+  const onCreateOrder = (e) => {
     e.preventDefault();
     const order = {
       name: name,
       email: email,
       address: address,
-      cartItems: shoppingCart,
+      cartItems: props.cartItems,
+      total: props.cartItems.reduce(
+        (acc, currItem) => acc + currItem.price * currItem.count,
+        0
+      ),
     };
-    onCreateOrder(order);
+    props.createOrder(order);
   };
 
-  console.log(typeof props.cartItems);
-  console.log(props.cartItems);
+  const onCloseModal = () => {
+    props.clearOrder();
+  };
 
   return (
     <div>
+      {props.order && (
+        <Modal isOpen={true} onRequestClose={onCloseModal} ariaHideApp={false}>
+          <Zoom>
+            <button className="close-modal" onClick={closeModal}>
+              x
+            </button>
+            <div className="order-details">
+              <h3 className="success-message">Your order has been placed.</h3>
+              <h2>Order {props.order._id}</h2>
+              <ul>
+                <li>
+                  <div>Name:</div>
+                  <div>{props.order.name}</div>
+                </li>
+                <li>
+                  <div>Email:</div>
+                  <div>{props.order.email}</div>
+                </li>
+                <li>
+                  <div>Address:</div>
+                  <div>{props.order.address}</div>
+                </li>
+                <li>
+                  <div>Total:</div>
+                  <div>${props.order.total}</div>
+                </li>
+                <li>
+                  <div>Cart Items:</div>
+                  <div>
+                    {props.order.cartItems.map((item) => (
+                      <div>
+                        {item.count} {" x "} {item.title}
+                      </div>
+                    ))}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </Zoom>
+        </Modal>
+      )}
       <div className="cart">
         <Fade left cascade>
           <ul className="cart-items">
@@ -84,7 +136,7 @@ const Cart = (
           {showCheckout && (
             <Fade right cascade>
               <div className="cart">
-                <form onSubmit={createOrder}>
+                <form onSubmit={onCreateOrder}>
                   <ul className="form-container">
                     <li>
                       <label>Email</label>
@@ -92,7 +144,7 @@ const Cart = (
                         name="email"
                         type="email"
                         required
-                        onChange={handleInput}
+                        onChange={(e) => handleInput(e, "email")}
                       />
                     </li>
                     <li>
@@ -101,16 +153,16 @@ const Cart = (
                         name="name"
                         type="text"
                         required
-                        onChange={handleInput}
+                        onChange={(e) => handleInput(e, "name")}
                       />
                     </li>
                     <li>
                       <label>Address</label>
                       <input
-                        name="addres"
+                        name="address"
                         type="text"
                         required
-                        onChange={handleInput}
+                        onChange={(e) => handleInput(e, "address")}
                       />
                     </li>
                     <li>
@@ -131,8 +183,13 @@ const Cart = (
 
 const mapStateToProps = (state) => {
   return {
+    order: state.order.order,
     cartItems: state.cart.cartItems,
   };
 };
 
-export default connect(mapStateToProps, { removeFromCart })(Cart);
+export default connect(mapStateToProps, {
+  removeFromCart,
+  createOrder,
+  clearOrder,
+})(Cart);
