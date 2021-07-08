@@ -8,6 +8,7 @@ const App = () => {
     <div className="grid-container">
       <header>
         <a href="/">React Shopping Cart</a>
+        <a href="/">Sign In</a>
       </header>
       <main>
         <div className="content">

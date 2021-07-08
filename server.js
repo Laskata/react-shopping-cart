@@ -6,39 +6,7 @@ const shortid = require("shortid");
 const app = express();
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost/react-shopping-cart-db", {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useUnifiedTopology: true,
-});
-
-const Product = mongoose.model(
-  "products",
-  new mongoose.Schema({
-    _id: { type: String, default: shortid.generate },
-    title: String,
-    descitpion: String,
-    image: String,
-    price: Number,
-    availableSizes: [String],
-  })
-);
-
-app.get("/api/products/", async (req, res) => {
-  const products = await Product.find({});
-  res.send(products);
-});
-
-app.post("/api/products/", async (req, res) => {
-  const newProduct = new Product(req.body);
-  const savedProduct = await newProduct.save();
-  res.send(savedProduct);
-});
-
-app.delete("/api/products/:id", async (req, res) => {
-  const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-  res.send(deletedProduct);
-});
+// ORDERS
 
 const Order = mongoose.model(
   "order",
@@ -83,3 +51,26 @@ app.post("/api/orders", async (req, res) => {
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("serve at http://localhost:5000"));
+
+const dotenv = require("dotenv");
+const cors = require("cors");
+
+//IMPORT ROTUES
+const authRoute = require("./routes/auth/auth");
+const authDashboard = require("./routes/auth/authDashboard");
+const productRoute = require("./routes/productRouter");
+
+//ACCESSING THE ENVIORMENT VARIABLES
+dotenv.config();
+
+// CONNECTION TO DATABASE
+mongoose.connect(
+  process.env.DB_CONNECT,
+  { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true },
+  () => console.log("connected to db")
+);
+
+app.use(express.json(), cors());
+app.use("/api/users", authRoute);
+app.use("/api/products", productRoute);
+app.use("/api/dashboard", authDashboard);
