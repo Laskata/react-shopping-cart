@@ -7,8 +7,8 @@ const User = require("../../models/User");
 const Joi = require("@hapi/joi");
 
 const registerSchema = Joi.object({
-  fname: Joi.string().min(3).required(),
-  lname: Joi.string().min(3).required(),
+  firstname: Joi.string().min(3).required(),
+  lastname: Joi.string().min(3).required(),
   email: Joi.string().min(6).required().email(),
   password: Joi.string().min(3).required(),
 });
@@ -27,8 +27,8 @@ router.post("/register", async (req, res) => {
 
   //ON PROCESS OF ADDING NEW USER
   const user = new User({
-    fname: req.body.fname,
-    lname: req.body.lname,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
     email: req.body.email,
     password: hashedPassword,
   });
@@ -44,10 +44,10 @@ router.post("/register", async (req, res) => {
       //NEW USER IS ADDED
 
       const saveUser = await user.save();
-      res.status(200).send("user created");
+      res.status(200).send("User created successfully");
     }
   } catch (error) {
-    rets.status(500).send(error);
+    res.status(500).send(error);
   }
 });
 
@@ -70,8 +70,15 @@ router.post("/login", async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
     else {
       //SENDING BACK TOKEN
-      const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-      res.header("auth-token", token).send(token);
+      const token = jwt.sign(
+        { _id: user._id, name: user.name, email: user.email },
+        process.env.TOKEN_SECRET
+      );
+      res.json({
+        token,
+        user: { id: user._id, name: user.firstname, email: user.email },
+      });
+      // res.header("auth-token", token).send(token);
     }
   } catch (error) {
     res.status(500).send(error);
